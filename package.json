@@ -2,7 +2,7 @@
   "name": "earth-bg",
   "version": "1.0.0",
   "description": "auto set earth bg",
-  "main": "index.js",
+  "main": "main.js",
   "scripts": {
     "start": "electron main.js",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -10,9 +10,9 @@
   "author": "Alex Hortopan",
   "license": "MIT",
   "dependencies": {
-    "node-gd": "^1.1.0",
     "path": "^0.12.7",
-    "request": "^2.69.0"
+    "request": "^2.69.0",
+    "wallpaper": "^2.1.0"
   },
   "devDependencies": {
     "electron-prebuilt": "^0.36.7"

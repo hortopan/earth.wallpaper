@@ -6,11 +6,12 @@ const BrowserWindow = electron.BrowserWindow;
 
 var mainWindow = null;
 
-app.on('window-all-closed', function() {
-  if (process.platform != 'darwin') {
-    app.quit();
-  }
-});
+var shouldQuit = app.makeSingleInstance(function(commandLine, workingDirectory){});
+
+if (shouldQuit){
+  app.quit();
+  return;
+}
 
 app.on('ready', function() {
 
@@ -23,13 +24,23 @@ app.on('ready', function() {
 
   var appIcon = new Tray(path.join(__dirname, 'assets', 'ui', 'img', 'icon_small.png'));
   var contextMenu = Menu.buildFromTemplate([
+    {label: 'Refresh', click:function(){
+      wp.refreshWallpaper(true);
+    }},
     { label: 'Quit',  click:function(){
       process.exit(0);
     }},
+
     ]);
+
+appIcon.on('click', function(){
+  return false;
+});
 
 appIcon.setToolTip('Earth real-time bg');
 appIcon.setContextMenu(contextMenu);
-app.dock.hide();
+if (process.platform == 'darwin'){
+  app.dock.hide();
+}
 
 });

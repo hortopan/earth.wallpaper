@@ -5,77 +5,35 @@ module.exports = function(app){
 
 	this.init = function(){
 		this.refreshWallpaper();
-		//setInterval(this.refreshWallpaper.bind(this), 1500);
+		setInterval(this.refreshWallpaper.bind(this), 60*1000*3);
 	}
 
-	this.refreshWallpaper = function(){
-		this.getWallpaper(function(err, file){
+	this.refreshWallpaper = function(force){
+		this.getWallpaper(force, function(err, file){
 			if (err){
 				console.error(err);
 				return;
 			}
 
-			this.setWallpaper(file);
+			this.setWallpaper(file, force);
 		});
 	}
 
-	this.setWallpaper = function(file){
+	this.setWallpaper = function(file, force){
 
-		if (this.currentWallpaper == file){
+		if (this.currentWallpaper == file && !force){
 			return;
 		}
 
-		var width = require('electron').screen.getPrimaryDisplay().workAreaSize.width;
-		var height = require('electron').screen.getPrimaryDisplay().workAreaSize.height;
+		const wallpaper = require('wallpaper');
 
-		const gd = require('node-gd');
-		gd.openPng(file, function(err,fgImg){
-
-			if (err){
-				return;
-			}
-
-			if (fgImg.width >= width){
-				this._setWallpaper(file);
-				return;
-			}
-
-			gd.createTrueColor(width, height, function(err,bgImg){
-
-				if (err){
-					return;
-				}
-
-
-				var x = Math.ceil((width - fgImg.width)/2);
-				var y = Math.ceil((height - fgImg.height)/2);
-				fgImg.copy(bgImg, x, y, 0, 0, fgImg.width, fgImg.height);
-
-				bgImg.saveFile(file, function(err){
-					if (err){
-						return back;
-					}
-
-					this._setWallpaper(file);
-				});
-
-			});
-
-		})
-
-	}
-
-	this._setWallpaper = function(file){
-		require('child_process').exec(`osascript -e 'tell application "Finder" to set desktop picture to POSIX file "${file}"'`, function(e,o,eo){
-			if (e){
-				console.error(e);
-			} else {
-				this.currentWallpaper = file;
-			}
+		wallpaper.set(file).then(function(e){
+			this.currentWallpaper = file;
 		});
+
 	}
 
-	this.getWallpaper = function(back){
+	this.getWallpaper = function(force, back){
 
 		require('request').get('http://himawari8-dl.nict.go.jp/himawari8/img/D531106/latest.json', function(err,res){
 			
@@ -113,7 +71,7 @@ module.exports = function(app){
 
 		require('fs').exists(tempFile, function(exists){
 
-			if (exists){
+			if (exists && !force){
 				return back(null, tempFile);
 			}
 
